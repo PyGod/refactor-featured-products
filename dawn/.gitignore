@@ -11,6 +11,10 @@ node_modules/
 
 # Shopify CLI files
 .shopify/
+!dawn/assets/*.js
+!dawn/assets/*.css
+!dawn/assets/*.map
+!dawn/assets/*.LICENSE.txt
 
 ## Release files
 release

@@ -9,12 +9,15 @@
  */
 {
   "sections": {
-    "main": {
-      "type": "hello-world",
-      "settings": {}
+    "featured_products_3gVxFM": {
+      "type": "featured-products",
+      "name": "featured-products",
+      "settings": {
+        "collection_handle": "featured-products"
+      }
     }
   },
   "order": [
-    "main"
+    "featured_products_3gVxFM"
   ]
 }
