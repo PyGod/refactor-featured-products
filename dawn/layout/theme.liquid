@@ -8,9 +8,7 @@
   </head>
 
   <body>
-    {% sections 'header-group' %}
     {{ content_for_layout }}
-    {% sections 'footer-group' %}
     {{ 'bundle.js' | asset_url | script_tag | replace: '<script', '<script defer' }}
   </body>
 </html>
