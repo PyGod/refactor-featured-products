@@ -9,6 +9,13 @@
 
   <body>
     {{ content_for_layout }}
-    {{ 'bundle.js' | asset_url | script_tag | replace: '<script', '<script defer' }}
+
+    <!-- Подключаем JS без defer, чтобы он загружался сразу -->
+    {{ 'bundle.js' | asset_url | script_tag }}
+
+    <!-- Добавляем компонент на главную страницу -->
+    {% if template == 'index' %}
+      <featured-products data-collection="featured-products"></featured-products>
+    {% endif %}
   </body>
 </html>

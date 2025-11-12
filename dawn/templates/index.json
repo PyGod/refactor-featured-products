@@ -11,10 +11,8 @@
   "sections": {
     "featured_products_3gVxFM": {
       "type": "featured-products",
-      "name": "featured-products",
-      "settings": {
-        "collection_handle": "featured-products"
-      }
+      "name": "Featured Products",
+      "settings": {}
     }
   },
   "order": [

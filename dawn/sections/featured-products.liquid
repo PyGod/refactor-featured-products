@@ -1,28 +1,29 @@
-{% schema %}
-{
-  "name": "Featured Products",
-  "settings": [
-    {
-      "type": "collection",
-      "id": "collection_handle",
-      "label": "Choose collection"
-    }
-  ],
-  "presets": [
-    {
-      "name": "Default",
-      "category": "Custom"
-    }
-  ]
-}
-{% endschema %}
-
-<section
-  data-section-id="{{ section.id }}"
-  class="featured-products-section"
-  data-collection="{{ section.settings.collection_handle }}">
-  <featured-products
-    data-section-id="{{ section.id }}"
-    data-collection="{{ section.settings.collection_handle }}">
-  </featured-products>
-</section>
+<div class="featured-products">
+  <h2 class="featured-products__title">Featured Products</h2>
+  <div class="featured-products__list">
+    {% if collection.products.size > 0 %}
+      {% for product in collection.products %}
+        <article class="featured-products__item">
+          {% assign image = product.featured_image %}
+          {% if image %}
+            <img src="{{ image | image_url: 'medium' }}" alt="{{ product.title }}" class="featured-products__image">
+          {% else %}
+            <img src="path/to/default/image.jpg" alt="No image available" class="featured-products__image" width="300" height="300">
+          {% endif %}
+          <div class="featured-products__details">
+            <h3 class="featured-products__title">
+              <a href="{{ product.url }}" class="featured-products__link">{{ product.title }}</a>
+            </h3>
+            <p class="featured-products__price">{{ product.price | money }}</p>
+            <form method="POST" action="/cart/add" class="featured-products__form">
+              <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+              <button type="submit" class="featured-products__add-to-cart">Add to Cart</button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    {% else %}
+      <p>No products found in this collection.</p>
+    {% endif %}
+  </div>
+</div>

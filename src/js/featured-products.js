@@ -1,29 +1,38 @@
 class FeaturedProducts extends HTMLElement {
   constructor() {
     super();
-    console.log('FeaturedProducts constructor');
-    this.collectionHandle = this.dataset.collection;
-    this.container = null;
+    console.log('Constructor called');
   }
 
   connectedCallback() {
     console.log('Web Component connected');
-    console.log('Collection handle:', this.collectionHandle);
-    this.render();
-    this.container = this.querySelector('.featured-products__list');
-    this.addEventListener();
+
+    // Логируем весь объект dataset
+    console.log('dataset:', this.dataset);
+
+    // Пытаемся извлечь значение из data-collection
+    this.collectionHandle = this.dataset.collection;
+    console.log('Collection handle from dataset:', this.collectionHandle);
+
+    if (this.collectionHandle) {
+      this.render();
+    } else {
+      console.log('No collection handle provided!');
+      this.innerHTML = '<p>No collection selected.</p>';
+    }
+
+    this.addEventListeners();
   }
 
   async render() {
-    if (!this.collectionHandle) {
-      this.innerHTML = '<p>No collection selected.</p>';
-      return;
-    }
+    console.log('Fetching collection:', this.collectionHandle);
+
     const response = await fetch(
       `/collections/${this.collectionHandle}?view=featured-products`
     );
     const html = await response.text();
     console.log('Fetched HTML:', html);
+
     this.innerHTML = `
       <section class="featured-products">
         <h2 class="featured-products__title">Featured Products</h2>
@@ -32,7 +41,11 @@ class FeaturedProducts extends HTMLElement {
     `;
   }
 
-  addEventListener() {
+  addEventListeners() {
+    // Предотвращаем повторную подписку на события
+    if (this.eventListenerAdded) return;
+    this.eventListenerAdded = true;
+
     this.addEventListener('click', async (event) => {
       if (event.target.matches('.featured-products__add-to-cart')) {
         const form = event.target.closest('form');
