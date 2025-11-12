@@ -9,13 +9,5 @@
 
   <body>
     {{ content_for_layout }}
-
-    <!-- Подключаем JS без defer, чтобы он загружался сразу -->
-    {{ 'bundle.js' | asset_url | script_tag }}
-
-    <!-- Добавляем компонент на главную страницу -->
-    {% if template == 'index' %}
-      <featured-products data-collection="featured-products"></featured-products>
-    {% endif %}
   </body>
 </html>
