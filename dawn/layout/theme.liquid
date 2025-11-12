@@ -1,27 +1,16 @@
 <!doctype html>
 <html lang="{{ request.locale.iso_code }}">
   <head>
-    {% # Inlined CSS Variables %}
     {% render 'css-variables' %}
-
-    {% # Load and preload the critical CSS %}
-    {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
-
-    {% # Social, title, etc. %}
     {% render 'meta-tags' %}
-
     {{ content_for_header }}
     {{ 'main.css' | asset_url | stylesheet_tag }}
-
   </head>
 
   <body>
     {% sections 'header-group' %}
-
     {{ content_for_layout }}
-
     {% sections 'footer-group' %}
-    {{ 'bundle.js' | asset_url | script_tag }}
-
+    {{ 'bundle.js' | asset_url | script_tag | replace: '<script', '<script defer' }}
   </body>
 </html>

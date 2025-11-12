@@ -1,6 +1,28 @@
-<div data-section-id="{{ section.id }}">
-  <featured-products 
-    data-collection="frontpage" 
-    data-section-id="{{ section.id }}">
+{% schema %}
+{
+  "name": "Featured Products",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection_handle",
+      "label": "Choose collection"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Default",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
+
+<section
+  data-section-id="{{ section.id }}"
+  class="featured-products-section"
+  data-collection="{{ section.settings.collection_handle }}">
+  <featured-products
+    data-section-id="{{ section.id }}"
+    data-collection="{{ section.settings.collection_handle }}">
   </featured-products>
-</div>
+</section>

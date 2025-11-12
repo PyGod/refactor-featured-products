@@ -1,0 +1,16 @@
+{% assign collection = collections[section.settings.collection_handle] %}
+{% if collection %}
+  <div class="featured-products__list">
+    {% for product in collection.products %}
+      <div class="featured-products__item">
+        <h3>{{ product.title }}</h3>
+        <form action="/cart/add" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+          <button class="featured-products__add-to-cart">Add to cart</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>No products found in this collection.</p>
+{% endif %}

@@ -1,21 +1,29 @@
 class FeaturedProducts extends HTMLElement {
   constructor() {
     super();
+    console.log('FeaturedProducts constructor');
     this.collectionHandle = this.dataset.collection;
     this.container = null;
   }
 
   connectedCallback() {
+    console.log('Web Component connected');
+    console.log('Collection handle:', this.collectionHandle);
     this.render();
     this.container = this.querySelector('.featured-products__list');
     this.addEventListener();
   }
 
   async render() {
+    if (!this.collectionHandle) {
+      this.innerHTML = '<p>No collection selected.</p>';
+      return;
+    }
     const response = await fetch(
       `/collections/${this.collectionHandle}?view=featured-products`
     );
     const html = await response.text();
+    console.log('Fetched HTML:', html);
     this.innerHTML = `
       <section class="featured-products">
         <h2 class="featured-products__title">Featured Products</h2>

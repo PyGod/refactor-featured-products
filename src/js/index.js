@@ -1,2 +1,2 @@
-import './main.sass';
+import '../sass/main.sass';
 import './featured-products.js';
