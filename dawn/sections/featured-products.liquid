@@ -1,8 +1,8 @@
 <div class="featured-products">
-  <!-- Заголовок секции -->
+
   <h2 class="featured-products__title">Featured Products</h2>
 
-  <!-- Контейнер для списка товаров, куда будут вставляться товары -->
+
   <div class="featured-products__list" id="featured-products-list-container">
     {% for product in collections['featured-products'].products %}
       <article class="featured-products__item">
@@ -27,7 +27,7 @@
             <a href="{{ product.url }}" class="featured-products__link">{{ product.title }}</a>
           </h3>
 
-          <!-- Цена товара внутри кнопки "Add to Cart" -->
+
           <form
             method="POST"
             action="/cart/add"
@@ -46,6 +46,6 @@
     {% endfor %}
   </div>
 
-  <!-- Вставляем Web Component для подгрузки продуктов -->
+
   <featured-products data-collection="featured-products"></featured-products>
 </div>
