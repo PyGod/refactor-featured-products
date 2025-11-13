@@ -8,6 +8,17 @@
   </head>
 
   <body>
+    <!-- Вставка header -->
+    <header>
+      {% section 'header' %}
+    </header>
     {{ content_for_layout }}
+    <!-- Вставка footer -->
+    <footer>
+      {% section 'footer' %}
+    </footer>
+
+
+    <script src="{{ 'bundle.js' | asset_url }}"></script>
   </body>
 </html>

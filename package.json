@@ -24,6 +24,7 @@
     "image-minimizer-webpack-plugin": "^4.1.4",
     "mini-css-extract-plugin": "^2.9.4",
     "postcss-loader": "^8.2.0",
+    "prettier-plugin-liquid": "^0.0.1-security",
     "sass": "^1.94.0",
     "sass-loader": "^16.0.6",
     "terser-webpack-plugin": "^5.3.14",
