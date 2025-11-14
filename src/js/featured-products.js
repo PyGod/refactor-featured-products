@@ -1,120 +1,109 @@
 class FeaturedProducts extends HTMLElement {
   constructor() {
     super();
-    this.collectionHandle = this.loaded = false;
-    this.products = [];
+    this.collectionHandle = this.dataset.collection;
+    this.loaded = false;
+    this.cartProductIds =
+      JSON.parse(localStorage.getItem('cartProductIds')) || [];
+    this.isCartLoaded = false;
+    this.isFirstRender = true;
   }
 
   async connectedCallback() {
     if (this.loaded) return;
     this.loaded = true;
-    await this.loadProducts();
-    this.render();
+
+    this.hideProducts();
+
+    await this.loadCart();
+
+    this.filterProducts();
+
     this.addAddToCartListeners();
+
+    this.addCartPageListener();
   }
 
-  async loadProducts() {
-    if (!this.collectionHandle) {
-      this.innerHTML = '<p>No collection selected.</p>';
-      return;
-    }
-
+  async loadCart() {
     try {
-      const response = await fetch(
-        `/collections/${this.collectionHandle}?view=featured-products`
+      const response = await fetch('/cart.js');
+      const cart = await response.json();
+      this.cartProductIds = cart.items.map((item) => item.variant_id);
+      localStorage.setItem(
+        'cartProductIds',
+        JSON.stringify(this.cartProductIds)
       );
-      const html = await response.text();
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const products = doc.querySelectorAll('.featured-products__item');
+      this.isCartLoaded = true;
 
-      this.products = Array.from(products).map((item) => {
-        return {
-          title: item.querySelector('.featured-products__title').textContent,
-          price: item.querySelector('.featured-products__price').textContent,
-          url: item.querySelector('a').getAttribute('href'),
-          imageUrl: item.querySelector('.featured-products__image img')
-            ? item
-                .querySelector('.featured-products__image img')
-                .getAttribute('src')
-            : '',
-          variantId: item.querySelector('form')
-            ? item.querySelector('form input[name="id"]').value
-            : '',
-        };
-      });
+      if (this.isFirstRender) {
+        this.isFirstRender = false;
+        this.showProducts();
+      }
+
+      this.updateCartIcon(cart);
     } catch (error) {
-      console.error('Error fetching featured products:', error);
-      this.innerHTML = '<p>Sorry, there was an error loading the products.</p>';
+      console.error('Error fetching cart:', error);
     }
   }
 
-  render() {
-    const container = document.getElementById(
-      'featured-products-list-container'
-    );
-    if (container && this.products.length) {
-      container.innerHTML = this.products
-        .map((product) => {
-          return `
-          <article class="featured-products__item">
-            ${
-              product.imageUrl
-                ? `<img src="${product.imageUrl}" class="featured-products__image" alt="${product.title}">`
-                : ''
-            }
-            <h3 class="featured-products__title">
-              <a href="${product.url}" class="featured-products__link">${
-            product.title
-          }</a>
-            </h3>
+  hideProducts() {
+    const productSection = document.querySelector('.featured-products__list');
+    if (productSection) {
+      productSection.style.display = 'none';
+    }
+  }
 
-            <!-- Цена товара внутри кнопки "Add to Cart" -->
-            <form method="POST" action="/cart/add" class="featured-products__form">
-              <input type="hidden" name="id" value="${product.variantId}">
-              <button type="submit" class="featured-products__add-to-cart">
-                Add to Cart - <span class="featured-products__price">${
-                  product.price
-                }</span>
-              </button>
-            </form>
-          </article>
-        `;
-        })
-        .join('');
+  showProducts() {
+    const productSection = document.querySelector('.featured-products__list');
+    if (productSection) {
+      productSection.style.display = 'block';
     }
   }
 
   addAddToCartListeners() {
-    const addToCartButtons = this.querySelectorAll(
-      '.featured-products__add-to-cart'
-    );
-    addToCartButtons.forEach((button) => {
-      button.addEventListener('click', this.handleAddToCart.bind(this)); // Убедитесь, что контекст правильный
-    });
+    document
+      .querySelectorAll('.featured-products__add-to-cart')
+      .forEach((button) => {
+        button.addEventListener('click', (event) => {
+          const variantId = button.getAttribute('data-variant-id');
+          this.handleAddToCart(event, variantId);
+        });
+      });
   }
 
-  async handleAddToCart(event) {
+  async handleAddToCart(event, variantId) {
     event.preventDefault();
 
-    const form = event.target.closest('form');
-    const formData = new FormData(form);
+    if (!variantId) {
+      alert('No variant selected!');
+      return;
+    }
 
     try {
       const response = await fetch('/cart/add.js', {
         method: 'POST',
-        body: formData,
+        body: JSON.stringify({ id: variantId, quantity: 1 }),
+        headers: { 'Content-Type': 'application/json' },
       });
 
       const data = await response.json();
-
       alert(`${data.title} was added to your cart`);
 
-      this.updateCart();
+      this.cartProductIds.push(variantId);
+      localStorage.setItem(
+        'cartProductIds',
+        JSON.stringify(this.cartProductIds)
+      );
+
+      await this.updateCart();
+
+      this.removeAddedProductFromSection(variantId);
+
+      this.updateCartIconImmediately();
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert('There was an error adding the item to the cart');
+      alert('There was an issue adding the item to the cart');
     }
   }
 
@@ -123,19 +112,92 @@ class FeaturedProducts extends HTMLElement {
       const response = await fetch('/cart.js');
       const cart = await response.json();
 
-      console.log('Cart updated:', cart);
+      this.cartProductIds = cart.items.map((item) => item.variant_id);
+      localStorage.setItem(
+        'cartProductIds',
+        JSON.stringify(this.cartProductIds)
+      );
 
-      const cartIcon = document.querySelector('.cart-icon__count');
+      this.updateCartIcon(cart);
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+    }
+  }
+
+  async updateCartIconImmediately() {
+    try {
+      const response = await fetch('/cart.js');
+      const cart = await response.json();
+      const cartIcon = document.querySelector('.cart-icon');
       if (cartIcon) {
-        cartIcon.textContent = cart.item_count;
-      }
-
-      const cartPopup = document.querySelector('.cart-popup');
-      if (cartPopup) {
-        cartPopup.style.display = 'flex';
+        const cartItemCount = cartIcon.querySelector('sup');
+        if (cartItemCount) {
+          cartItemCount.textContent = cart.item_count;
+        }
       }
     } catch (error) {
       console.error('Error fetching cart:', error);
+    }
+  }
+
+  updateCartIcon(cart) {
+    const cartIcon = document.querySelector('.cart-icon');
+    if (cartIcon) {
+      const cartItemCount = cartIcon.querySelector('sup');
+      if (cartItemCount) {
+        cartItemCount.textContent = cart.item_count;
+      } else if (cart.item_count > 0) {
+        const sup = document.createElement('sup');
+        sup.textContent = cart.item_count;
+        cartIcon.appendChild(sup);
+      }
+    }
+  }
+
+  removeAddedProductFromSection(variantId) {
+    const productElements = document.querySelectorAll(
+      '.featured-products__item'
+    );
+    productElements.forEach((product) => {
+      if (product.getAttribute('data-variant-id') === variantId.toString()) {
+        product.style.display = 'none';
+      }
+    });
+  }
+
+  filterProducts() {
+    if (!this.isCartLoaded) return;
+
+    const productElements = document.querySelectorAll(
+      '.featured-products__item'
+    );
+    productElements.forEach((product) => {
+      const variantId = product.getAttribute('data-variant-id');
+      if (this.cartProductIds.includes(parseInt(variantId))) {
+        product.style.display = 'none';
+      }
+    });
+  }
+
+  addCartPageListener() {
+    document.querySelector('.cart-icon').addEventListener('click', (event) => {
+      event.preventDefault();
+      this.showCartPage();
+    });
+  }
+
+  async showCartPage() {
+    try {
+      const cartContent = document.querySelector('#content');
+      if (cartContent) {
+        const response = await fetch('/cart');
+        const cartData = await response.text();
+        cartContent.innerHTML = cartData;
+      } else {
+        window.location.href = '/cart';
+      }
+    } catch (error) {
+      console.error('Error fetching cart page:', error);
     }
   }
 }

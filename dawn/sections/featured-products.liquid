@@ -1,51 +1,22 @@
 <div class="featured-products">
-
   <h2 class="featured-products__title">Featured Products</h2>
-
-
   <div class="featured-products__list" id="featured-products-list-container">
     {% for product in collections['featured-products'].products %}
-      <article class="featured-products__item">
+      <article class="featured-products__item" data-variant-id="{{ product.variants.first.id }}">
         {% if product.featured_image %}
-          {% render 'image'
-            , 
- class: 'featured-products__image'
-            , 
- image: product.featured_image
-            , 
- url: product.url
-            , 
- width: 400
-            , 
- height: 400
-            , 
- crop: 'center' %}
+          <img
+            class="featured-products__image"
+            src="{{ product.featured_image.src | img_url: 'large' }}"
+            alt="{{ product.title }}">
         {% endif %}
-
-        <div class="featured-products__details">
-          <h3 class="featured-products__title">
-            <a href="{{ product.url }}" class="featured-products__link">{{ product.title }}</a>
-          </h3>
-
-
-          <form
-            method="POST"
-            action="/cart/add"
-            class="featured-products__form">
-            <input
-              type="hidden"
-              name="id"
-              value="{{ product.variants.first.id }}">
-            <button type="submit" class="featured-products__add-to-cart">
-              Add to Cart -
-              <span class="featured-products__price">{{ product.price | money }}</span>
-            </button>
-          </form>
-        </div>
+        <h3 class="featured-products__title">{{ product.title }}</h3>
+        <button class="featured-products__add-to-cart" data-variant-id="{{ product.variants.first.id }}">
+          Add to Cart -
+          <span class="featured-products__price">{{ product.price | money }}</span>
+        </button>
       </article>
     {% endfor %}
   </div>
-
 
   <featured-products data-collection="featured-products"></featured-products>
 </div>
