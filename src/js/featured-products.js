@@ -62,6 +62,8 @@ class FeaturedProducts extends HTMLElement {
   }
 
   addAddToCartListeners() {
+    debugger;
+
     document
       .querySelectorAll('.featured-products__add-to-cart')
       .forEach((button) => {
@@ -100,7 +102,7 @@ class FeaturedProducts extends HTMLElement {
 
       this.removeAddedProductFromSection(variantId);
 
-      this.updateCartIconImmediately();
+      // this.updateCartIconImmediately();
     } catch (error) {
       console.error('Error adding to cart:', error);
       alert('There was an issue adding the item to the cart');
@@ -108,10 +110,10 @@ class FeaturedProducts extends HTMLElement {
   }
 
   async updateCart() {
+    debugger;
     try {
       const response = await fetch('/cart.js');
       const cart = await response.json();
-
       this.cartProductIds = cart.items.map((item) => item.variant_id);
       localStorage.setItem(
         'cartProductIds',
@@ -124,32 +126,49 @@ class FeaturedProducts extends HTMLElement {
     }
   }
 
-  async updateCartIconImmediately() {
-    try {
-      const response = await fetch('/cart.js');
-      const cart = await response.json();
-      const cartIcon = document.querySelector('.cart-icon');
-      if (cartIcon) {
-        const cartItemCount = cartIcon.querySelector('sup');
-        if (cartItemCount) {
-          cartItemCount.textContent = cart.item_count;
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching cart:', error);
-    }
-  }
+  // async updateCartIconImmediately() {
+  //   try {
+  //     const response = await fetch('/cart.js');
+  //     const cart = await response.json();
+  //     const cartIcon = document.querySelector('.cart-icon');
+  //     if (cartIcon) {
+  //       const cartItemCount = cartIcon.querySelector('sup');
+  //       if (cartItemCount) {
+  //         cartItemCount.textContent = cart.item_count;
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching cart:', error);
+  //   }
+  // }
 
   updateCartIcon(cart) {
-    const cartIcon = document.querySelector('.cart-icon');
+    const cartIcon = document.querySelector('#cart-icon-bubble');
     if (cartIcon) {
-      const cartItemCount = cartIcon.querySelector('sup');
-      if (cartItemCount) {
-        cartItemCount.textContent = cart.item_count;
+      let cartCountBubble = cartIcon.querySelector('.cart-count-bubble');
+      if (cartCountBubble) {
+        const itemCount = cartCountBubble.querySelector(
+          'span[aria-hidden="true"]'
+        );
+        if (itemCount) {
+          itemCount.textContent = cart.item_count;
+        }
       } else if (cart.item_count > 0) {
-        const sup = document.createElement('sup');
-        sup.textContent = cart.item_count;
-        cartIcon.appendChild(sup);
+        cartCountBubble = document.createElement('div');
+        cartCountBubble.classList.add('cart-count-bubble');
+
+        const countVisible = document.createElement('span');
+        countVisible.setAttribute('aria-hidden', 'true');
+        countVisible.textContent = cart.item_count;
+
+        const countHidden = document.createElement('span');
+        countHidden.classList.add('visually-hidden');
+        countHidden.textContent = `${cart.item_count} items`;
+
+        cartCountBubble.appendChild(countVisible);
+        cartCountBubble.appendChild(countHidden);
+
+        cartIcon.appendChild(cartCountBubble);
       }
     }
   }
@@ -180,10 +199,12 @@ class FeaturedProducts extends HTMLElement {
   }
 
   addCartPageListener() {
-    document.querySelector('.cart-icon').addEventListener('click', (event) => {
-      event.preventDefault();
-      this.showCartPage();
-    });
+    document
+      .getElementById('cart-icon-bubble')
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        this.showCartPage();
+      });
   }
 
   async showCartPage() {

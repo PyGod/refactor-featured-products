@@ -18,12 +18,11 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dawn/assets'),
     filename: 'bundle.js',
-
-    // 🚫 Больше не очищаем папку assets полностью
     clean: {
       keep: (assetPath) => {
-        // сохраняем всё, что в fonts и images
-        return assetPath.includes('fonts/') || assetPath.includes('images/');
+        return !assetPath.match(
+          /(bundle\.js|main\.css|.*\.map|bundle\.js\.LICENSE\.txt)$/
+        );
       },
     },
   },
@@ -32,7 +31,6 @@ module.exports = {
 
   module: {
     rules: [
-      // SASS / CSS
       {
         test: [/\.s[ac]ss$/i, /\.css$/i],
         use: [
@@ -43,7 +41,6 @@ module.exports = {
               sourceMap: true,
               url: {
                 filter: (url) => {
-                  // 🚫 не обрабатываем пути к уже готовым ассетам
                   if (
                     url.includes('assets/fonts') ||
                     url.includes('assets/images')
@@ -69,7 +66,6 @@ module.exports = {
         ],
       },
 
-      // JS через Babel
       {
         test: /\.m?js$/,
         exclude: /node_modules/,

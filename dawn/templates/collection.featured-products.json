@@ -1,9 +1,0 @@
-{
-  "sections": {
-    "main": {
-      "type": "featured-products",
-      "settings": {}
-    }
-  },
-  "order": ["main"]
-}
