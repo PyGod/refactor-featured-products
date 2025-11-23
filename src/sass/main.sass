@@ -2,93 +2,79 @@
 @use 'variables'
 @use 'fonts'
 
-// Базовые стили для мобильных устройств (Mobile First)
+body
+    font-family: "Gothic A1", sans-serif
+
 .featured-products
     max-width: 100%
     margin: 0 auto
-    padding: 20px
+    padding: 43px 0 60px 0
+
     &__heading
-        font-size: 42px
+        font-size: 1.625em
         text-align: center
-        font-family: "Gothic A1", sans-serif
         font-weight: 900
         color: variables.$color-secondary
-        margin-bottom: 60px
+        margin-bottom: 30px
+
     &__title
-        font-size: 24px
+        color: variables.$color-secondary
+        font-weight: 700
+        font-size: 1.375em
         text-align: center
+        margin-bottom: 11px
 
     &__list
         display: flex
+        flex-direction: column
+        gap: 50px
         flex-wrap: wrap
-        gap: 119px 20px
-        width: 100%
-        &_hide
-            display: none
-        &_show
-            display: flex
-
+        transition: gap 0.3s ease
     &__item
         display: flex
         flex-direction: column
-        width: 100%
-        &_hide
+        align-items: center
+        &_hidden
             display: none
-        &_show
-            display: flex
 
     &__link
-        display: flex
-        flex-direction: column
-        align-items: center
         text-decoration: none
     &__image
         width: 100%
+        max-width: 520px
+        height: 340px
         object-fit: cover
+        margin-bottom: 1.875em
 
-    &__title
-        text-align: center
-        font-size: 18px
-
-    &__add-to-cart
+    &__button
         display: inline-block
         white-space: nowrap
         width: fit-content
         background-color: variables.$color-primary
-        color: white
+        color: variables.$color-accent
+        font-weight: 400
+        font-size: 16px
         padding: 18px 80px
         border: none
         border-radius: 40px
-        text-align: center
-        font-size: 16px
         cursor: pointer
 
-    &__add-to-cart:hover
-        background-color: #2a6bb3
+        &:hover
+            background-color: variables.$color-primary-hover
 
-// Разрешение xs: до 576px
-@media (max-width: 576px)
-    .featured-products
-        padding-left: 15px
-        padding-right: 15px
+        &_loading
+            cursor: progress
 
-        &__item
-            width: 100%
-
-        &__image
-            height: 220px
-
-        &__title
-            font-size: 16px
-
-// Разрешение sm: от 576px
+/*.is-hidden
+ display: none  You can use this style instead of BEM modifiers in the future if you want for more flexibility:)
 @media (min-width: 576px)
     .featured-products
-        padding-left: 20px
-        padding-right: 20px
+        padding: 43px 30px 60px 30px
 
         &__list
+            flex-direction: row
             justify-content: space-between
+            gap: 20px
 
         &__item
             width: calc(50% - 10px)
@@ -96,13 +82,15 @@
         &__image
             height: 240px
 
-        &__title
-            font-size: 18px
+        &__button
+            padding: 18px 40px
 
 @media (min-width: 768px)
     .featured-products
-        padding: 0 30px
+        padding: 60px 40px
+
         &__list
+            gap: 40px 20px
             justify-content: space-between
 
         &__item
@@ -114,17 +102,19 @@
         &__title
             font-size: 20px
 
-// Разрешение lg: от 992px
+        &__button
+            padding: 18px 76px
+
 @media (min-width: 992px)
     .featured-products
-        padding-left: 40px
-        padding-right: 40px
+        padding: 60px 60px
 
         &__list
+            gap: 119px 40px
             justify-content: space-between
 
         &__item
-            width: calc(50% - 10px)
+            width: calc(50% - 20px)
 
         &__image
             height: 300px
@@ -132,22 +122,23 @@
         &__title
             font-size: 22px
 
-// Разрешение xl: от 1200px
 @media (min-width: 1200px)
     .featured-products
         padding: 80px 140px 147px 140px
 
         &__list
-            justify-content: space-between
+            gap: 119px 40px
+            justify-content: center
+            flex-wrap: wrap
 
         &__item
-            width: calc(50% - 20px)
+            width: calc(50% - 40px)
 
         &__image
             height: 340px
             margin-bottom: 30px
 
         &__title
+            font-size: 24px
             line-height: 42px
             margin-bottom: 11px
-            font-size: 24px

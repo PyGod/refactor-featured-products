@@ -2,208 +2,163 @@ class FeaturedProducts extends HTMLElement {
   constructor() {
     super();
     this.collectionHandle = this.dataset.collection;
-    this.loaded = false;
+    this.sectionId = this.dataset.sectionId;
     this.cartProductIds = [];
-    this.isCartLoaded = false;
-    this.isFirstRender = true;
+    this.loaded = false;
   }
 
   async connectedCallback() {
     if (this.loaded) return;
     this.loaded = true;
 
-    this.hideProducts();
-    await this.loadCart(); // Загружаем корзину с сервера
-    this.filterProducts();
+    await this.loadCart();
+
+    this.initObserver();
+
     this.addToCartListeners();
   }
 
-  hideProducts() {
-    const productSection = document.querySelector('.featured-products__list');
-    if (productSection)
-      productSection.classList.add('featured-products__list_hide');
-  }
-
-  showProducts() {
-    const productSection = document.querySelector('.featured-products__list');
-    if (productSection)
-      productSection.classList.add('featured-products__list_show');
-  }
-
   async fetchCart() {
-    const response = await fetch('/cart.js');
-    return await response.json();
+    const resp = await fetch('/cart.js');
+    return resp.json();
   }
 
   async loadCart() {
     try {
       const cart = await this.fetchCart();
       this.cartProductIds = cart.items.map((item) => item.variant_id);
-      this.isCartLoaded = true;
 
-      if (this.isFirstRender) {
-        this.isFirstRender = false;
-        this.filterProducts();
-        this.showProducts();
-      }
+      await this.updateSection();
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
-      this.updateCartIcon(cart);
-    } catch (error) {
-      console.error('Error fetching cart:', error);
+  async updateSection() {
+    try {
+      const response = await fetch(`/?section_id=${this.sectionId}`);
+      const sectionHtml = await response.text();
+      const parser = new DOMParser();
+      const dom = parser.parseFromString(sectionHtml, 'text/html');
+      const newSection = dom.querySelector('featured-products');
+      if (newSection) this.innerHTML = newSection.innerHTML;
+
+      this.filterProducts();
+      this.addToCartListeners();
+    } catch (err) {
+      console.error(err);
     }
   }
 
   filterProducts() {
-    if (!this.isCartLoaded) return;
-
-    const productElements = document.querySelectorAll(
-      '.featured-products__item'
-    );
-    productElements.forEach((product) => {
-      const variantId = product.dataset.variantId;
-      if (this.cartProductIds.includes(parseInt(variantId))) {
-        product.classList.add('featured-products__item_hide');
+    const items = this.querySelectorAll('.featured-products__item');
+    items.forEach((item) => {
+      const variantId = parseInt(item.dataset.variantId, 10);
+      if (this.cartProductIds.includes(variantId)) {
+        item.classList.add('featured-products__item_hidden');
+      } else {
+        item.classList.remove('featured-products__item_hidden');
       }
     });
   }
 
   addToCartListeners() {
-    const buttons = document.querySelectorAll(
-      '.featured-products__add-to-cart'
-    );
+    const buttons = this.querySelectorAll('.featured-products__button');
     buttons.forEach((button) => {
-      button.addEventListener('click', (event) =>
-        this.handleAddToCart(event, button)
-      );
+      button.removeEventListener('click', button._handler);
+      button._handler = (e) => this.handleAddToCart(e, button);
+      button.addEventListener('click', button._handler);
     });
   }
 
   async handleAddToCart(event, button) {
     event.preventDefault();
-    const variantId = button.dataset.variantId;
-
-    if (!variantId) {
-      alert('No variant selected!');
-      return;
-    }
-
-    if (this.cartProductIds.includes(parseInt(variantId))) {
-      button.disabled = true;
-      return;
-    }
+    const variantId = parseInt(button.dataset.variantId, 10);
+    if (!variantId) return;
 
     button.disabled = true;
-    button.classList.add('loading');
+    button.textContent = 'Adding...';
 
     try {
-      const addedCartItem = await this.addToCart(variantId);
-      alert(`${addedItem.title} was added to your cart`);
+      await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: variantId, quantity: 1 }),
+      });
 
-      this.cartProductIds.push(addedItem.id);
-      await this.updateCart();
+      this.cartProductIds.push(variantId);
+
+      this.filterProducts();
+      await this.updateCartIcon();
       await this.updateDrawer();
-      this.updateCartIcon(cart);
-      this.removeAddedProductFromSection(variantId);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      alert('There was an issue adding the item to the cart');
+    } catch (err) {
+      console.error(err);
     } finally {
       button.disabled = false;
-      button.classList.remove('loading');
+      button.textContent = 'Add to Cart';
     }
   }
 
-  async addToCart(variantId) {
-    const response = await fetch('/cart/add.js', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: variantId, quantity: 1 }),
-    });
-    return await response.json();
-  }
-
-  // Новый метод: обновляем корзину и перерисовываем Drawer через Section Rendering API
-  async updateCart() {
-    try {
-      // 1. Получаем текущее состояние корзины
-      const cart = await this.fetchCart();
-      this.cartProductIds = cart.items.map((item) => item.variant_id);
-    } catch (error) {
-      console.error('Error updating cart:', error);
-    }
-  }
-
-  async updateDrawerContent() {
-    try {
-      const response = await fetch(`${routes.cart_url}?section_id=cart-drawer`);
-      const html = await response.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-
-      const cartDrawer = document.querySelector('cart-drawer');
-      if (cartDrawer) {
-        const newDrawerContent = doc.querySelector('cart-drawer');
-        if (newDrawerContent) {
-          cartDrawer.replaceWith(newDrawerContent);
-        }
-      }
-    } catch {
-      console.error('Error updating drawer:', error);
-    }
-  }
-
-  updateCartIcon(cart) {
+  async updateCartIcon() {
     const cartIcon = document.querySelector('#cart-icon-bubble');
     if (!cartIcon) return;
 
-    let cartCountBubble = cartIcon.querySelector('.cart-count-bubble');
-    if (cart.item_count > 0) {
-      if (!cartCountBubble) {
-        cartCountBubble = this.createCartCountBubble(cart.item_count);
-        cartIcon.appendChild(cartCountBubble);
-      } else {
-        this.updateCartCount(cartCountBubble, cart.item_count);
+    let bubble = cartIcon.querySelector('.cart-count-bubble');
+    const itemCount = this.cartProductIds.length;
+
+    if (itemCount > 0) {
+      if (!bubble) {
+        bubble = document.createElement('div');
+        bubble.className = 'cart-count-bubble';
+        cartIcon.appendChild(bubble);
       }
-    } else if (cartCountBubble) {
-      cartCountBubble.remove();
+      bubble.textContent = itemCount;
+    } else if (bubble) {
+      bubble.remove();
+    }
+
+    try {
+      const response = await fetch(
+        `${routes.cart_url}?section_id=cart-icon-bubble`
+      );
+      const html = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const serverBubble = doc.querySelector('.cart-count-bubble');
+
+      if (serverBubble) {
+        const currentBubble = cartIcon.querySelector('.cart-count-bubble');
+        if (currentBubble) {
+          currentBubble.replaceWith(serverBubble);
+        } else {
+          cartIcon.appendChild(serverBubble);
+        }
+      } else {
+        const currentBubble = cartIcon.querySelector('.cart-count-bubble');
+        if (currentBubble) currentBubble.remove();
+      }
+    } catch (err) {
+      console.error(`Erro can't update cart icon from server`, err);
     }
   }
 
-  createCartCountBubble(itemCount) {
-    const cartCountBubble = document.createElement('div');
-    cartCountBubble.classList.add('cart-count-bubble');
-
-    const countVisible = document.createElement('span');
-    countVisible.setAttribute('aria-hidden', 'true');
-    countVisible.textContent = itemCount;
-
-    const countHidden = document.createElement('span');
-    countHidden.classList.add('visually-hidden');
-    countHidden.textContent = `${itemCount} items`;
-
-    cartCountBubble.append(countVisible, countHidden);
-    return cartCountBubble;
+  async updateDrawer() {
+    const response = await fetch(`${routes.cart_url}?section_id=cart-drawer`);
+    const html = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const newDrawer = doc.querySelector('cart-drawer');
+    const drawer = document.querySelector('cart-drawer');
+    if (drawer && newDrawer) drawer.replaceWith(newDrawer);
   }
 
-  updateCartCount(cartCountBubble, itemCount) {
-    const itemCountVisible = cartCountBubble.querySelector(
-      'span[aria-hidden="true"]'
-    );
-    const itemCountHidden = cartCountBubble.querySelector('.visually-hidden');
-
-    if (itemCountVisible) itemCountVisible.textContent = itemCount;
-    if (itemCountHidden) itemCountHidden.textContent = `${itemCount} items`;
-  }
-
-  removeAddedProductFromSection(variantId) {
-    const productElements = document.querySelectorAll(
-      '.featured-products__item'
-    );
-    productElements.forEach((product) => {
-      if (product.dataset.variantId === variantId.toString()) {
-        product.classList.add('featured-products__item_hide');
-      }
+  initObserver() {
+    const observer = new MutationObserver(() => {
+      this.filterProducts();
+      this.addToCartListeners();
     });
+    const list = this.querySelector('.featured-products__list');
+    if (list) observer.observe(list, { childList: true, subtree: true });
   }
 }
 
