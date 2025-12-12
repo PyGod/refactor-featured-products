@@ -19,5 +19,3 @@ dawn/assets/*.LICENSE.txt
 .DS_Store
 Thumbs.db
 
-# Environment .env file
-.env
