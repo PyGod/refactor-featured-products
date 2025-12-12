@@ -1,44 +1,23 @@
-<featured-products data-collection="featured-products" data-section-id="{{ section.id }}">
-  {% assign cart_items = cart.items | map: 'variant_id' %}
-
-  <style>
+{% comment %}
+  <style> // Uncomment this style if you want to use classic Critical Css to avoid FOUC instead of inline class Critical Css
     {% for product in collections['featured-products'].products %}
       {% assign variantId = product.variants.first.id %}
       {% if cart_items contains variantId %}
         #featured-product-{{ variantId }} {
-          display: none !important;
+          display: none;
         }
       {% endif %}
     {% endfor %}
   </style>
+{% endcomment %}
 
+<featured-products data-collection="featured-products" data-section-id="{{ section.id }}">
+  {% assign cart_items = cart.items | map: 'variant_id' %}
   <div class="featured-products">
     <h2 class="featured-products__heading">Featured Products</h2>
     <div class="featured-products__list" id="featured-products-list-container">
       {% for product in collections['featured-products'].products %}
-        <article
-          class="featured-products__item"
-          id="featured-product-{{ product.variants.first.id }}"
-          data-variant-id="{{ product.variants.first.id }}">
-          <a href="{{ product.url }}" class="featured-products__link">
-            {% if product.featured_image %}
-              <picture class="featured-products__image-container">
-                <source media="(min-width: 1200px)" srcset="{{ product.featured_image.src | img_url: '2048x2048' }}">
-                <source media="(min-width: 768px)" srcset="{{ product.featured_image.src | img_url: '1024x1024' }}">
-                <img
-                  class="featured-products__image"
-                  src="{{ product.featured_image.src | img_url: '500x500' }}"
-                  alt="{{ product.title }}"
-                  loading="lazy">
-              </picture>
-            {% endif %}
-            <h3 class="featured-products__title">{{ product.title }}</h3>
-          </a>
-          <button class="featured-products__button" data-variant-id="{{ product.variants.first.id }}">
-            Add to Cart -
-            <span class="featured-products__price">{{ product.price | money }}</span>
-          </button>
-        </article>
+        {% render 'featured-products-item', product: product, cart_items: cart_items %}
       {% endfor %}
     </div>
   </div>

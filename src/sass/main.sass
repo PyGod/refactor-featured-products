@@ -1,9 +1,7 @@
-@use 'reset'
+@use "normalize.css/normalize.css" as *
 @use 'variables'
 @use 'fonts'
-
-body
-    font-family: "Gothic A1", sans-serif
+@use 'mixins' as *
 
 .featured-products
     max-width: 100%
@@ -11,16 +9,19 @@ body
     padding: 43px 0 60px 0
 
     &__heading
+        font-family: "Gothic A1",sans-serif
         font-size: 1.625em
-        text-align: center
         font-weight: 900
         color: variables.$color-secondary
+        text-align: center
         margin-bottom: 30px
-
+        @include media('xl')
+            font-size: 2.625em
     &__title
-        color: variables.$color-secondary
-        font-weight: 700
+        font-family: "Gothic A1" , sans-serif
         font-size: 1.375em
+        font-weight: 700
+        color: variables.$color-secondary
         text-align: center
         margin-bottom: 11px
 
@@ -30,45 +31,65 @@ body
         gap: 50px
         flex-wrap: wrap
         transition: gap 0.3s ease
+
+        @include media('sm')
+            gap: 20px
+
+        @include media('md')
+            gap: 40px
+            justify-content: space-between
+
     &__item
         display: flex
         flex-direction: column
         align-items: center
+        justify-content: space-between
         &_hidden
-            display: none
+            display: none !important
 
     &__link
         text-decoration: none
+
     &__image
         width: 100%
-        max-width: 520px
-        height: 340px
+        height: auto
         object-fit: cover
         margin-bottom: 1.875em
+        transform: translateY(0)
+        transition: transform 0.3s ease, box-shadow 0.3s ease
+
+        &:hover
+            box-shadow: 5px 5px 2px variables.$color-secondary
+            transform: translateY(-5px)
 
     &__button
         display: inline-block
+        font-family: "Gothic A1", sans-serif
         white-space: nowrap
         width: fit-content
         background-color: variables.$color-primary
         color: variables.$color-accent
         font-weight: 400
-        font-size: 16px
+        font-size: 1em
         padding: 18px 80px
         border: none
         border-radius: 40px
         cursor: pointer
-
+        transition: .3s background-color ease-in-out
         &:hover
             background-color: variables.$color-primary-hover
 
         &_loading
-            cursor: progress
+            cursor: wait
+            background-color: variables.$color-secondary
 
-/*.is-hidden
- display: none  You can use this style instead of BEM modifiers in the future if you want for more flexibility:)
-@media (min-width: 576px)
-    .featured-products
+        @include media('sm')
+            padding: 18px 40px
+
+        @include media('md')
+            padding: 18px 76px
+
+    @include media('sm')
         padding: 43px 30px 60px 30px
 
         &__list
@@ -77,16 +98,13 @@ body
             gap: 20px
 
         &__item
-            width: calc(50% - 10px)
-
+            width: 100%
         &__image
-            height: 240px
-
+            aspect-ratio: 4 / 2.6154
         &__button
-            padding: 18px 40px
+            padding: 18px 76px
 
-@media (min-width: 768px)
-    .featured-products
+    @include media('md')
         padding: 60px 40px
 
         &__list
@@ -96,17 +114,13 @@ body
         &__item
             width: calc(50% - 10px)
 
-        &__image
-            height: 260px
-
         &__title
             font-size: 20px
 
         &__button
             padding: 18px 76px
 
-@media (min-width: 992px)
-    .featured-products
+    @include media('lg')
         padding: 60px 60px
 
         &__list
@@ -116,29 +130,35 @@ body
         &__item
             width: calc(50% - 20px)
 
-        &__image
-            height: 300px
-
         &__title
             font-size: 22px
+        &__heading
+            font-size: 2.25em
 
-@media (min-width: 1200px)
-    .featured-products
+    @include media('xl')
         padding: 80px 140px 147px 140px
 
         &__list
             gap: 119px 40px
-            justify-content: center
             flex-wrap: wrap
 
         &__item
-            width: calc(50% - 40px)
+            width: calc(50% - 20px)
 
         &__image
-            height: 340px
             margin-bottom: 30px
+            transform: translateY(0)
+            transition: transform 0.3s ease, box-shadow 0.3s ease
+            &:hover
+                box-shadow: 5px 5px 2px variables.$color-secondary
+                transform: translateY(-5px)
 
         &__title
             font-size: 24px
             line-height: 42px
             margin-bottom: 11px
+
+        &__heading
+            font-size: 2.625em
+// .is-hidden
+//     display: none // Uncomment this style if you want use all-purpose hidden style instead of BEM modifier
