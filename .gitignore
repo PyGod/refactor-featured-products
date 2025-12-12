@@ -7,15 +7,16 @@ package-lock.json
 .env
 
 # Webpack output
-dist/
-
-# Shopify Dawn build
-dawn/assets/*.js
-dawn/assets/*.css
-dawn/assets/*.map
-dawn/assets/*.LICENSE.txt
+dawn/assets/main.js        
+dawn/assets/bundle.js       
+dawn/assets/*.map.js        
+dawn/assets/main.map.css     
+dawn/assets/bundle.map.js    
+dawn/assets/*.map            
+dawn/assets/favicon.ico
+dawn/assets/fonts/
+dawn/assets/*.png
 
 # System files
 .DS_Store
 Thumbs.db
-
