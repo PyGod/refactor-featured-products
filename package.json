@@ -6,7 +6,7 @@
   "scripts": {
     "generate-icons": "node scripts/generate-icons.js",
     "dev": "npm run generate-icons && webpack --mode development --watch",
-    "build": "npm run generate-icons && webpack --mode production && shopify theme push --path ./dawn --theme $THEME_ID --store $SHOPIFY_STORE"
+    "build": "npm run generate-icons && webpack --mode production && shopify theme push --force"
   },
   "keywords": [],
   "author": "",
