@@ -14,7 +14,7 @@ dawn/assets/main.map.css
 dawn/assets/bundle.map.js    
 dawn/assets/*.map            
 dawn/assets/favicon.ico
-dawn/assets/fonts/
+dawn/assets/fonts/*
 dawn/assets/*.png
 
 # System files
