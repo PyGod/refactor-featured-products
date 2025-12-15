@@ -1,9 +1,0 @@
-{
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "destination": "https://refactor-shop-dawn.myshopify.com",
-      "permanent": false
-    }
-  ]
-}
