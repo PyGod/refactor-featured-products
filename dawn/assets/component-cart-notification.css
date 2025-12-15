@@ -19,10 +19,15 @@
   transform: translateY(100%);
   visibility: hidden;
   width: 100%;
+  min-width: 172.4px;
   box-shadow: var(--popup-shadow-horizontal-offset)
     var(--popup-shadow-vertical-offset) var(--popup-shadow-blur-radius)
     rgba(var(--color-shadow), var(--popup-shadow-opacity));
   z-index: 1;
+}
+
+.cart-notification-item .cart-item {
+  grid-template: repeat(1, auto) / 1fr;
 }
 
 .cart-notification.focused {
@@ -116,7 +121,7 @@
 
 .cart-notification-product__image {
   display: inline-flex;
-  margin-right: 1.5rem;
+  margin-right: 2rem;
   margin-top: 0.5rem;
 }
 
